@@ -11,8 +11,8 @@ from flask_cors import CORS
 
 # ================== Declare Flask into app =====================
 app = Flask(__name__)
-CORS(app)
-CORS(app, resources={r"/*": {"origins": "*"}})
+app = CORS(app)
+# CORS(app, resources={r"/*": {"origins": "*"}})
 api = Api(app, catch_all_404s=True)
 # ===============================================================
 
