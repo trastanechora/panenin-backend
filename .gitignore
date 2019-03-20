@@ -1,6 +1,6 @@
-/__pycache__
-app.*
-*.pyc
+__pycache__
+app.log*
+# *.pyc
 api-endpoint-list
 note.txt
 history.txt

@@ -12,10 +12,11 @@ from flask_cors import CORS
 # ================== Declare Flask into app =====================
 app = Flask(__name__)
 CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 api = Api(app, catch_all_404s=True)
 # ===============================================================
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://ok:ok@172.11.111.69/green_project'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://ok:ok@172.31.13.102/green_project'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'SFhewoihewg870923ugsihgh3298hgoisdghsiueg32gMAE'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)

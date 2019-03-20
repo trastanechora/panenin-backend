@@ -9,7 +9,7 @@ bp_auth = Blueprint('auth', __name__)
 api = Api(bp_auth)
 
 class CreateTokenResources(Resource):
-    def get(self):
+    def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', location='json', required=True)
         parser.add_argument('password', location='json', required=True)
