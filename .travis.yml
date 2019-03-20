@@ -1,0 +1,3 @@
+before_install:
+- openssl aes-256-cbc -K $encrypted_7149eff3fd26_key -iv $encrypted_7149eff3fd26_iv
+  -in deploy_rsa.enc -out deploy_rsa -d
