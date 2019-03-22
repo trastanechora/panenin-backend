@@ -9,6 +9,7 @@ bp_auth = Blueprint('auth', __name__)
 api = Api(bp_auth)
 
 class CreateTokenResources(Resource):
+    @crossdomain(origin='*')
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', location='json', required=True)
@@ -20,7 +21,7 @@ class CreateTokenResources(Resource):
         if qry is not None:
             token = create_access_token(identity = marshal(qry, User.response_field))
         else:
-            return {'status':'UNAUTORIZED', 'message':'invalid key or secret'}, 401
+            return {'status':'UNAUTORIZED', 'message':'invalid key or secret'}, 401, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
         return {'token': token}, 200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
 
 api.add_resource(CreateTokenResources, '/public/login')
