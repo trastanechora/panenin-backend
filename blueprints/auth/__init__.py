@@ -21,6 +21,6 @@ class CreateTokenResources(Resource):
             token = create_access_token(identity = marshal(qry, User.response_field))
         else:
             return {'status':'UNAUTORIZED', 'message':'invalid key or secret'}, 401
-        return {'token': token}, 200
+        return {'token': token}, 200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
 
 api.add_resource(CreateTokenResources, '/public/login')

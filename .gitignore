@@ -3,4 +3,5 @@ app.log*
 # *.pyc
 api-endpoint-list
 note.txt
+note2.txt
 history.txt
