@@ -5,8 +5,10 @@ from logging.handlers import RotatingFileHandler
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from blueprints import app, manager
+from flask_cors import CORS
 
 # ================ Run the app and extras ========================
+CORS(app)
 if __name__ == "__main__":
     formatter = logging.Formatter("[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
     log_handler = RotatingFileHandler("%s/%s" % (app.root_path, 'storage/log/app.log'), maxBytes=10000, backupCount=10)
