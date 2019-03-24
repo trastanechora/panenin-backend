@@ -18,7 +18,7 @@ class Product(db.Model):
     status = db.Column(db.String(20))
     # offer = db.Column(db.ARRAY(db.String), server_default="[]")
     # offer = db.ARRAY(db.String), server_default='[]'
-    offer = db.Column(db.String(2000))
+    offer = db.Column(db.Text)
     delivery_provided = db.Column(db.String(10))
 
     response_field = {

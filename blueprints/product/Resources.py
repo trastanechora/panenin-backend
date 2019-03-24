@@ -1,5 +1,6 @@
 import logging, json
 import datetime
+import math
 from flask import Blueprint
 from flask_restful import Api, Resource, reqparse, marshal
 from blueprints import db
@@ -21,17 +22,38 @@ class ProductResource(Resource):
 
     def get(self, id=None):
         parse = reqparse.RequestParser()
-        parse.add_argument('p',type=int,location='args',default=1)
-        parse.add_argument('rp',type=int,location='args',default=5)
+        parse.add_argument('p',type=int,location='args', default=1)
+        parse.add_argument('rp',type=int,location='args', default=10)
         parse.add_argument('client_id',location='args')
         parse.add_argument('status',location='args')
         parse.add_argument('id', type=int, location="args")
+        parse.add_argument('search', location="args")
+
+        parse.add_argument('category', location='args', default='all')
+        parse.add_argument('type', location='args', default='all')
                 
         args = parse.parse_args()
 
         offset = args['p']*args['rp']-args['rp']
 
         qry = Product.query
+
+        if args['search'] is not None:
+            qry = qry.filter(Product.name.like("%"+args['search']+"%"))
+            if qry.first() is None:
+                qry = Product.query.filter(Product.category.like("%"+args['search']+"%"))
+                if qry.first() is None:
+                    qry = Product.query.filter(Product.product_type.like("%"+args['search']+"%"))
+                    if qry.first() is None:
+                        qry = Product.query.filter(Product.location.like("%"+args['search']+"%"))
+                        if qry.first() is None:
+                            return {'status': 'Not Found', 'message': 'Item not found'}, 404, {'Content-Type': 'application/json'}
+
+        if args['category'] != 'all':
+            qry = qry.filter(Product.category.like("%"+args['category']+"%"))
+
+        if args['type'] != 'all':
+            qry = qry.filter(Product.product_type.like("%"+args['type']+"%"))
 
         product_list = []
         if id == None:
@@ -41,7 +63,17 @@ class ProductResource(Resource):
             product = Product.query.filter_by(id=id).first()
             product_list.append(marshal(product, Product.response_field))
 
-        return product_list, 200, {'Content-Type': 'application/json'}
+        # return product_list, 200, {'Content-Type': 'application/json'}
+        return {
+            'status': 'OK',
+            'total_results': qry.count(),
+            'page': args['p'],
+            'total_page': math.ceil(qry.count() / args['rp']),
+            'displaying': len(product_list),
+            'category': args['category'],
+            'type': args['type'],
+            'data': product_list
+        }, 200, {'Content-Type': 'application/json'}
 
     @jwt_required
     def post(self):
