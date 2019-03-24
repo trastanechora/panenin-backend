@@ -1,4 +1,5 @@
 import logging, json
+import datetime
 from flask import Blueprint
 from flask_restful import Api, Resource, reqparse, marshal
 from ..user import User
@@ -11,7 +12,14 @@ CORS(bp_auth)
 api = Api(bp_auth)
 
 class CreateTokenResources(Resource):
-    # @crossdomain(origin='*')
+    def get(self):
+        user = get_jwt_identity()
+        identity = marshal(user, User.response_field)
+        return {
+            'status': 'OK',
+            'data': identity
+        }, 200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('username', location='json', required=True)
@@ -29,6 +37,18 @@ class CreateTokenResources(Resource):
             'logged_in_as': args['username'],
             'token': token
         }, 200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+
+# class ShowUserProfile(Resource):
+#     @jwt_required
+#     def get(self):
+#         user = get_jwt_identity()
+#         identity = marshal(user, User.response_field)
+
+#         return {
+#             'status': 'OK',
+#             'data': identity,
+#             'valid_thru': datetime.now() + timedelta(hours=1)
+#         }, 200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
 
 
 api.add_resource(CreateTokenResources, '/public/login')

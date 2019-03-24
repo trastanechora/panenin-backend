@@ -21,6 +21,7 @@ class OfferResource(Resource):
         parse.add_argument('rp',type=int,location='args',default=5)
         parse.add_argument('client_id',location='args')
         parse.add_argument('status',location='args')
+        parse.add_argument('product_id', location='args')
         
         args = parse.parse_args()
 
@@ -29,9 +30,14 @@ class OfferResource(Resource):
         qry = Offer.query
 
         offer_list = []
-        for offer in qry.all():
+        if args['product_id'] == None:
+            for offer in qry.all():
+                offer_list.append(marshal(offer, Offer.response_field))
+            return offer_list, 200, {'Content-Type': 'application/json'}
+        else:
+            offer = Offer.query.filter_by(product_id=args['product_id']).all()
             offer_list.append(marshal(offer, Offer.response_field))
-        return offer_list, 200, {'Content-Type': 'application/json'}
+            return offer_list, 200, {'Content-Type': 'application/json'}
 
     @jwt_required
     def post(self):

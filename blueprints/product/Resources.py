@@ -96,7 +96,10 @@ class ProductResource(Resource):
         db.session.add(product)
         db.session.commit()
 
-        return marshal(product, Product.response_field), 200, {'Content-Type': 'application/json'}
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return marshal(product, Product.response_field), 200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
+        # response.headers.add('Access-Control-Allow-Origin', '*')
+        # return marshal(user, User.response_field), 200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
 
 
     @jwt_required
