@@ -21,6 +21,7 @@ class OfferResource(Resource):
         parse.add_argument('rp',type=int,location='args',default=5)
         parse.add_argument('client_id',location='args')
         parse.add_argument('status',location='args')
+        parse.add_argument('product_id', location='args')
         
         args = parse.parse_args()
 
@@ -29,9 +30,14 @@ class OfferResource(Resource):
         qry = Offer.query
 
         offer_list = []
-        for offer in qry.all():
+        if args['product_id'] == None:
+            for offer in qry.all():
+                offer_list.append(marshal(offer, Offer.response_field))
+            return offer_list, 200, {'Content-Type': 'application/json'}
+        else:
+            offer = Offer.query.filter_by(product_id=args['product_id']).all()
             offer_list.append(marshal(offer, Offer.response_field))
-        return offer_list, 200, {'Content-Type': 'application/json'}
+            return offer_list, 200, {'Content-Type': 'application/json'}
 
     @jwt_required
     def post(self):
@@ -51,7 +57,7 @@ class OfferResource(Resource):
         # =========
 
         # ========= Put together the input parameters into JSON formated as offer
-        offer = Offer(None, args['product_id'], identity['id'], args['amount'], args['price'], args['description'], args['destination'], datetime.datetime.now(), "WAITING")
+        offer = Offer(None, args['product_id'], identity['id'], identity['username'], args['amount'], args['price'], args['description'], args['destination'], datetime.datetime.now(), "WAITING", None)
         db.session.add(offer)
         db.session.commit()
         # =========
@@ -87,14 +93,14 @@ class OfferResource(Resource):
     @jwt_required
     def put(self, id):
         parse = reqparse.RequestParser()
-        parse.add_argument('status', location='json', required=True)
+        parse.add_argument('flag', location='json', required=True)
         args = parse.parse_args()
 
         user = get_jwt_identity()
         identity = marshal(user, User.response_field)
 
         offer = Offer.query.filter_by(id=id).first()
-        offer.status = args['status']
+        offer.flag = args['flag']
         db.session.commit()
         return marshal(offer, Offer.response_field), 200, {'Content-Type': 'application/json'}
     
