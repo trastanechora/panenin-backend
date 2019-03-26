@@ -37,6 +37,7 @@ class ProductResource(Resource):
         offset = args['p']*args['rp']-args['rp']
 
         qry = Product.query
+        qry =qry.filter(Product.flag.like('Available'))
 
         if args['search'] is not None:
             qry = qry.filter(Product.name.like("%"+args['search']+"%"))
@@ -56,12 +57,32 @@ class ProductResource(Resource):
             qry = qry.filter(Product.product_type.like("%"+args['type']+"%"))
 
         product_list = []
+        if args['id'] != None:
+            temp = qry.filter_by(posted_by=args['id']).all()
+            for product in temp:
+                product_list.append(marshal(product, Product.response_field))
+            return {
+            'status': 'OK',
+            'total_results': qry.count(),
+            'page': args['p'],
+            'total_page': math.ceil(qry.count() / args['rp']),
+            'displaying': len(product_list),
+            'category': args['category'],
+            'type': args['type'],
+            'data': product_list
+                }, 200, {'Content-Type': 'application/json'}
+
+
         if id == None:
             for product in qry.limit(args['rp']).offset(offset).all():
                 product_list.append(marshal(product, Product.response_field))
         else:
             product = Product.query.filter_by(id=id).first()
             product_list.append(marshal(product, Product.response_field))
+            # temp = Product.query.filter_by(posted_by=id).all()
+            # for product in temp:
+            #     product_list.append(marshal(product, Product.response_field))
+            # product_list.append(marshal(product, Product.response_field))
 
         # return product_list, 200, {'Content-Type': 'application/json'}
         return {
@@ -83,6 +104,7 @@ class ProductResource(Resource):
         parse.add_argument('category', location='json', required=True)
         parse.add_argument('description', location='json')
         parse.add_argument('amount', location='json', required=True)
+        parse.add_argument('constanta', location='json', required=True)
         parse.add_argument('price', location='json', required=True)
         parse.add_argument('location', location='json', required=True)
         parse.add_argument('delivery_provided', location='json', required=True)
@@ -91,12 +113,12 @@ class ProductResource(Resource):
         user = get_jwt_identity()
         identity = marshal(user, User.response_field)
 
-        product = Product(None, args['name'], args['product_type'], args['category'], args['description'], args['amount'], args['price'], datetime.datetime.now(), identity['id'], args['location'], "OPEN", None, args['delivery_provided'])
+        product = Product(None, args['name'], args['product_type'], args['category'], args['description'], args['amount'], args['constanta'], args['price'], datetime.datetime.now(), identity['id'], args['location'], "OPEN", None, args['delivery_provided'], "Available")
 
         db.session.add(product)
         db.session.commit()
 
-        response.headers.add('Access-Control-Allow-Origin', '*')
+        # response.headers.add('Access-Control-Allow-Origin', '*')
         return marshal(product, Product.response_field), 200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
         # response.headers.add('Access-Control-Allow-Origin', '*')
         # return marshal(user, User.response_field), 200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
@@ -134,6 +156,14 @@ class ProductResource(Resource):
     def delete(self, id):
         pass
 
+class UserDeleteProduct(Resource):
+    @jwt_required
+    def put(self, id):
+        qry = Product.query.filter_by(id=id).first()
+        qry.flag = "Deleted"
+        db.session.commit()
+
+
 class AdminProduct(Resource):
     @jwt_required    
     def delete(self, id):
@@ -147,4 +177,5 @@ class AdminProduct(Resource):
             return "Data Not Found", 404, { 'Content-Type': 'application/json' }
 
 api.add_resource(ProductResource,'/public/products', '/public/products/<int:id>')
+api.add_resource(UserDeleteProduct, '/users/products/<int:id>')
 api.add_resource(AdminProduct, '/admin/products/<int:id>')

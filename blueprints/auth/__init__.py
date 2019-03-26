@@ -12,6 +12,7 @@ CORS(bp_auth)
 api = Api(bp_auth)
 
 class CreateTokenResources(Resource):
+    @jwt_required
     def get(self):
         user = get_jwt_identity()
         identity = marshal(user, User.response_field)

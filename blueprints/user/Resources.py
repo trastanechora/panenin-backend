@@ -12,7 +12,7 @@ api = Api(bp_user)
 class UserResource(Resource):
     def __init__(self):
         if User.query.first() is None:
-            user = User(None, "trastanechora", "roadtoalterra", None, "maestro@alphatech.id", None, None, None, None, datetime.datetime.now(), None, None)
+            user = User(None, "trastanechora", "roadtoalterra", None, "maestro@alphatech.id", None, None, None, None, datetime.datetime.now(), None, None, None)
             db.session.add(user)
             db.session.commit()
 
@@ -66,12 +66,12 @@ class UserResource(Resource):
         parse.add_argument('email', location='json', required=True)
         args = parse.parse_args()
 
-        user = User(None, args['username'], args['password'], None, args['email'], None, None, None, None, datetime.datetime.now(), None, None)
+        user = User(None, args['username'], args['password'], None, args['email'], None, None, None, None, datetime.datetime.now(), None, None, None)
 
         db.session.add(user)
         db.session.commit()
 
-        response.headers.add('Access-Control-Allow-Origin', '*')
+        # response.headers.add('Access-Control-Allow-Origin', '*')
         return marshal(user, User.response_field), 200, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
 
 class AdminResource(Resource):
