@@ -30,6 +30,11 @@ class OfferResource(Resource):
         qry = Offer.query
 
         offer_list = []
+        if id != None:
+            offer = Offer.query.filter_by(id=id).first()
+            offer_list.append(marshal(offer, Offer.response_field))
+            return offer_list, 200, {'Content-Type': 'application/json'}
+
         if args['product_id'] == None:
             for offer in qry.all():
                 offer_list.append(marshal(offer, Offer.response_field))

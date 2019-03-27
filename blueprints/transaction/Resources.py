@@ -41,7 +41,8 @@ class TransactionResource(Resource):
     @jwt_required
     def post(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('user_id', location='json', required=True)
+        parse.add_argument('seller_id', location='json', required=True)
+        parse.add_argument('buyer_id', location='json', required=True)
         parse.add_argument('product_id', location='json', required=True)
         parse.add_argument('method', location='json', required=True)
         parse.add_argument('amount', location='json', required=True)
@@ -52,7 +53,8 @@ class TransactionResource(Resource):
         user = get_jwt_identity()
         identity = marshal(user, User.response_field)
 
-        transaction = Transaction(None, args['user_id'], args['product_id'], args['method'], args['amount'], args['bank'], datetime.datetime.now(), args['status'])
+        transaction = Transaction(None, args['seller_id'], args['buyer_id'], args['product_id'], args['method'], args['amount'], args['bank'], datetime.datetime.now(), args['status'])
+        # (self, id, seller_id,  buyer_id, product_id, method, amount, bank, created_at, status)
 
         db.session.add(transaction)
         db.session.commit()
